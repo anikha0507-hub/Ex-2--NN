@@ -1,8 +1,9 @@
-<H3>Name</H3>
-<H3>Register no.</H3>
-<H3>Date</H3>
-<H3>Experiment No. 2 </H3>
+<H3>Name:Anikha Pillai</H3>
+<H3>Register no. 212225230016</H3>
+<H3>Date: 21/11/26</H3>
+<H3>Experiment-2 </H3>
 ## Implementation of Perceptron for Binary Classification
+
 # AIM:
 To implement a perceptron for classification using Python<BR>
 
@@ -49,13 +50,140 @@ STEP 9:For ‘N ‘ iterations ,do the following:<BR>
 STEP 10:Plot the error for each iteration <BR>
 STEP 11:Print the accuracy<BR>
 # PROGRAM:
-    ''' Insert your code here '''
+```
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
+
+class Perceptron:
+    def __init__(self, learning_rate=0.1):
+        self.learning_rate = learning_rate
+        self.b = 0.0
+        self.w = None
+        self.misclassified_samples = []
+
+    def fit(self, x: np.array, y: np.array, n_iter=10):
+        self._b = 0.0
+        self._w = np.zeros(x.shape[1])
+        self.misclassified_samples = []
+
+        for _ in range(n_iter):
+            errors = 0
+            for xi, yi in zip(x, y):
+                update = self.learning_rate * (yi - self.predict(xi))
+                self._b += update
+                self._w += update * xi
+                errors += int(update != 0.0)
+            self.misclassified_samples.append(errors)
+
+    def f(self, x: np.array) -> float:
+        return np.dot(x, self._w) + self._b
+
+    def predict(self, x: np.array) -> int:
+        return np.where(self.f(x) >= 0, 1, -1)
+
+
+# Load the Breast Cancer binary classification dataset
+df = pd.read_csv("/content/breast_cancer_binary_dataset.csv")
+print(df.head())
+
+# Select the target and first three numerical features
+y = df["diagnosis"].values
+feature_names = ["mean radius", "mean texture", "mean perimeter"]
+x = df[feature_names].values
+
+# Convert class names to numeric labels for plotting and training
+# Malignant = 0, Benign = 1
+y_numeric = np.where(y == "Malignant", 0, 1)
+
+# 3D scatter plot using three features
+fig = plt.figure()
+ax = plt.axes(projection="3d")
+ax.set_title("Breast Cancer Dataset")
+ax.set_xlabel("Mean radius")
+ax.set_ylabel("Mean texture")
+ax.set_zlabel("Mean perimeter")
+
+ax.scatter(
+    x[y_numeric == 0, 0], x[y_numeric == 0, 1], x[y_numeric == 0, 2],
+    color="red", marker="o", s=8, label="Malignant"
+)
+ax.scatter(
+    x[y_numeric == 1, 0], x[y_numeric == 1, 1], x[y_numeric == 1, 2],
+    color="blue", marker="^", s=8, label="Benign"
+)
+
+plt.legend(loc="upper left")
+plt.show()
+
+# Use the first two features for the 2D plot and Perceptron
+x = x[:, 0:2]
+
+plt.figure(figsize=(5, 5))
+plt.scatter(
+    x[y_numeric == 0, 0], x[y_numeric == 0, 1],
+    color="red", marker="o", s=12, label="Malignant"
+)
+plt.scatter(
+    x[y_numeric == 1, 0], x[y_numeric == 1, 1],
+    color="blue", marker="x", s=12, label="Benign"
+)
+
+plt.xlabel("Mean radius")
+plt.ylabel("Mean texture")
+plt.title("Breast Cancer Binary Classification")
+plt.legend(loc="upper left")
+plt.show()
+
+# Perceptron uses labels -1 and +1
+# Malignant = +1, Benign = -1
+y = np.where(y_numeric == 0, 1, -1)
+
+# Split first, then standardize using training data only
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.25, random_state=0, stratify=y
+)
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+
+classifier = Perceptron(learning_rate=0.01)
+classifier.fit(x_train, y_train, n_iter=10)
+
+y_pred = classifier.predict(x_test)
+print("Accuracy:", accuracy_score(y_test, y_pred) * 100)
+
+# Plot the number of misclassified samples in each epoch
+plt.figure(figsize=(5, 4))
+plt.plot(
+    range(1, len(classifier.misclassified_samples) + 1),
+    classifier.misclassified_samples,
+    marker="o"
+)
+plt.xlabel("Epoch")
+plt.ylabel("Errors")
+plt.title("Perceptron Learning")
+plt.show()
+```
 
 # OUTPUT:
 
-    ''' Show your result '''
+ <img width="564" height="564" alt="image" src="https://github.com/user-attachments/assets/564bbba6-cde3-4b9d-9c35-f1b0a6e504a8" />
+
+ <img width="601" height="627" alt="image" src="https://github.com/user-attachments/assets/d0806e1b-b893-4569-ade1-d0c13f0a2aa6" />
+
+ <img width="627" height="574" alt="image" src="https://github.com/user-attachments/assets/805db49b-cc59-4da2-8995-3f7196009b48" />
+
+
+
 
 # RESULT:
- Thus, a single layer perceptron model is implemented using python to classify Iris data set.
+ Thus, a single layer perceptron model is implemented using python to classify breast cancer data set.
 
  
